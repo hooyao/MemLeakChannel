@@ -12,8 +12,10 @@ namespace MemLeakQ
             IAsyncBlockingQueue<string> inputQueue = new AsyncBlockingQueue<string>("testQ", 100);
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             List<Task> longRunTasks = new List<Task>();
-
-            Task.WaitAll(longRunTasks.ToArray());
+            
+            var gcRunner = new GCRunner();
+            longRunTasks.Add(Task.Run(async ()=> await gcRunner.Start(cancellationTokenSource.Token).ConfigureAwait(false)));
+            
             for (int i = 0; i < 500; i++)
             {
                 var runner = new MemLeakRunner(inputQueue);
